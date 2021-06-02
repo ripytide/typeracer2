@@ -25,19 +25,20 @@ function Typer(props) {
 
 	return (
 		<div className="flex flex-wrap justify-start gap-x-1">
-			{state.words.map((word, i) => (
-				<Word word={word} key={i.toString()}/>
-			))}
+			{state.words.map((word, i) => {
+				return <Word word={word} key={i.toString()} />;
+			})}
 		</div>
 	);
 
 	function TypeCharacter(character) {
-		setState((os) => {
+		console.log("key hit: " + character);
+		setState((oldState) => {
 			//os is short for old state
-			let tempWord = os.words[os.wordPos];
+			let currWord = oldState.words[oldState.wordPos]; //get a reference to the currentWord
 
-			if (os.letterPos < tempWord.length) {
-				let tempCharacter = tempWord[os.letterPos];
+			if (oldState.letterPos < currWord.length) {
+				let tempCharacter = currWord[oldState.letterPos];
 
 				if (character === tempCharacter.character) {
 					tempCharacter.status = "valid";
@@ -45,25 +46,27 @@ function Typer(props) {
 					tempCharacter.status = "invalid";
 				}
 
-				tempWord[os.letterPos] = tempCharacter;
+				currWord[oldState.letterPos] = tempCharacter;
 			} else {
-				tempWord.push({
+				currWord.push({
 					original: false,
 					character,
 					status: "invalid",
 				});
 			}
 
-			os.words[os.wordPos] = tempWord;
+			let newState = { ...oldState };
+			//this next line is unneccecary as arrays are reference types
+			newState.words[oldState.wordPos] = currWord;
 
-			os.letterPos++;
+			newState.letterPos++;
 
-			return os;
+			return newState;
 		});
 	}
 
 	function DeleteCharacter() {
-		console.log("please implement deletecharacter");
+		console.log('Deleting Character');
 	}
 
 	function GetWords(txt) {
@@ -148,7 +151,7 @@ function Word({ word }) {
 	return (
 		<div>
 			{word.map((letter, i) => (
-				<letter key={i.toString()}>{letter.character}</letter>
+				<letter className='text-3xl' key={i.toString()}>{letter.character}</letter>
 			))}
 		</div>
 	);
