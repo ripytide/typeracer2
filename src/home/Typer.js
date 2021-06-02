@@ -1,3 +1,6 @@
+import React, { useState, useEffect, useReducer } from "react";
+import cloneDeep from "lodash/cloneDeep";
+
 export default function Typer(props) {
 	const [state, dispatch] = useReducer(reducer, {
 		words: GetWords(props.text),
@@ -13,10 +16,10 @@ export default function Typer(props) {
 		return () => window.removeEventListener("keydown", KeyDown);
 
 		function KeyDown(e) {
-			if (isValidCharacter(e.key)) {
-				TypeCharacter(e.key);
-			} else if (e.key === "Backspace") {
-				DeleteCharacter();
+			if (e.key === "Backspace") {
+				dispatch({ type: "removeLetter" });
+			} else {
+				dispatch({ type: "addLetter", character: e.key });
 			}
 		}
 	}, []);
@@ -28,51 +31,71 @@ export default function Typer(props) {
 			})}
 		</div>
 	);
+}
 
-	function TypeCharacter(character) {
-		console.log("key hit: " + character);
-		setState((oldState) => {
-			//os is short for old state
-			let currWord = oldState.words[oldState.wordPos]; //get a reference to the currentWord
+function reducer(oldState, action) {
+	//create a deep copy for immutability sake and so react does not bail out of re-rendering due to the refernce not changing
+	let stateCopy = cloneDeep(oldState);
 
-			if (oldState.letterPos < currWord.length) {
-				let tempCharacter = currWord[oldState.letterPos];
+	switch (action.type) {
+		case "addLetter":
+			return addLetter(stateCopy, action.character);
+		case "removeLetter":
+			return removeLetter(stateCopy);
+		default:
+			throw "That is not a vailid action type: " + action.type;
+	}
+}
 
-				if (character === tempCharacter.character) {
-					tempCharacter.status = "valid";
-				} else {
-					tempCharacter.status = "invalid";
-				}
+function addLetter(state, character) {
+	if (!isValidCharacter(character)) return state;
 
-				currWord[oldState.letterPos] = tempCharacter;
-			} else {
-				currWord.push({
-					original: false,
-					character,
-					status: "invalid",
-				});
-			}
+	let currWord = state.words[state.wordPos]; //get a reference to the currentWord
 
-			let newState = { ...oldState };
-			//this next line is unneccecary as arrays are reference types
-			newState.words[oldState.wordPos] = currWord;
+	if (state.letterPos < currWord.length) {
+		let currCharacter = currWord[state.letterPos]; //also a reference
 
-			newState.letterPos++;
-
-			return newState;
+		if (character === currCharacter.character) {
+			currCharacter.status = "valid";
+		} else {
+			currCharacter.status = "invalid";
+		}
+	} else {
+		currWord.push({
+			original: false,
+			character,
+			status: "invalid",
 		});
 	}
 
-	function DeleteCharacter() {
-		console.log('Deleting Character');
+	state.letterPos++;
+
+	return state;
+}
+
+function removeLetter(state) {
+	let currWord = state.words[state.wordPos];
+
+	if (state.letterPos > 0) {
+		if (currWord[state.letterPos - 1].original) {
+			currWord[state.letterPos - 1].status = "untyped";
+		} else {
+			currWord.pop();
+		}
+
+		state.letterPos--;
 	}
+
+	return state;
 }
 
 function Word({ word }) {
 	return (
 		<div>
 			{word.map((letter, i) => (
-				<letter className='text-3xl' key={i.toString()}>{letter.character}</letter>
+				<letter className="text-3xl" key={i.toString()}>
+					{letter.character}
+				</letter>
 			))}
 		</div>
 	);
@@ -154,4 +177,3 @@ function isValidCharacter(character) {
 	];
 	return validCharacters.includes(character);
 }
-
