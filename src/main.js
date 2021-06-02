@@ -6,8 +6,8 @@ import {
 	Link
 } from "react-router-dom";
 
-import Home from "./home.js";
-import About from "./about.js";
+import Home from "./home/home.js";
+import About from "./about/about.js";
 
 export default function App() {
   return (
