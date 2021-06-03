@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import cloneDeep from "lodash/cloneDeep";
 
 export default function Typer(props) { //required props are text:string and finished:callback_function
@@ -30,7 +30,7 @@ export default function Typer(props) { //required props are text:string and fini
 					dispatch({ type: "addLetter", character: e.key, finished: props.finished });
 			}
 		}
-	}, []);
+	}, [props.finished]);
 
 	return (
 		<div className="flex flex-wrap justify-start gap-x-1">
@@ -59,12 +59,12 @@ function reducer(oldStateHistory, action) {
 			nextWord(newState);
 			break;
 		default:
-			throw "That is not a vailid action type: " + action.type;
+			throw new Error("That is not a vailid action type: " + action.type);
 	}
 
 	newHistory.push(newState);
 
-	let onLastLetter = newState.letterPos === newState.words[newState.wordPos].length && newState.wordPos == newState.words.length - 1
+	let onLastLetter = newState.letterPos === newState.words[newState.wordPos].length && newState.wordPos === newState.words.length - 1
 	if (onLastLetter) action.finished(newHistory)
 
 	return newHistory;
@@ -151,6 +151,7 @@ function getLetterColor(status) {
 		case "invalid":
 			colorClass = "text-red-400";
 			break;
+		default:
 	}
 
 	return colorClass;
