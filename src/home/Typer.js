@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useReducer } from "react";
 import cloneDeep from "lodash/cloneDeep";
 
-export default function Typer(props) {
-	const [state, dispatch] = useReducer(reducer, {
-		words: GetWords(props.text),
-		wordPos: 0,
-		letterPos: 0,
-	});
+export default function Typer(props) { //required props are text:string and finished:callback_function
+	const [stateHistory, dispatch] = useReducer(reducer, [
+		{
+			words: GetWords(props.text),
+			wordPos: 0,
+			letterPos: 0,
+		},
+	]);
+	let state = stateHistory[stateHistory.length - 1];
 
 	useEffect(() => {
 		//executed when component mounts
@@ -16,10 +19,15 @@ export default function Typer(props) {
 		return () => window.removeEventListener("keydown", KeyDown);
 
 		function KeyDown(e) {
-			if (e.key === "Backspace") {
-				dispatch({ type: "removeLetter" });
-			} else {
-				dispatch({ type: "addLetter", character: e.key });
+			switch (e.key) {
+				case "Backspace":
+					dispatch({ type: "removeLetter" });
+					break;
+				case " ":
+					dispatch({ type: "nextWord" });
+					break;
+				default:
+					dispatch({ type: "addLetter", character: e.key, finished: props.finished });
 			}
 		}
 	}, []);
@@ -33,18 +41,33 @@ export default function Typer(props) {
 	);
 }
 
-function reducer(oldState, action) {
-	//create a deep copy for immutability sake and so react does not bail out of re-rendering due to the refernce not changing
-	let stateCopy = cloneDeep(oldState);
+function reducer(oldStateHistory, action) {
+	//create a shallow copy for immutability sake and so react does not bail out of re-rendering due to the refernce not changing
+	let newHistory = [...oldStateHistory]
+
+	let newState = cloneDeep(newHistory[newHistory.length - 1]);
 
 	switch (action.type) {
 		case "addLetter":
-			return addLetter(stateCopy, action.character);
+			addLetter(newState, action.character);
+			break;
+
 		case "removeLetter":
-			return removeLetter(stateCopy);
+			removeLetter(newState);
+			break;
+		case "nextWord":
+			nextWord(newState);
+			break;
 		default:
 			throw "That is not a vailid action type: " + action.type;
 	}
+
+	newHistory.push(newState);
+
+	let onLastLetter = newState.letterPos === newState.words[newState.wordPos].length && newState.wordPos == newState.words.length - 1
+	if (onLastLetter) action.finished(newHistory)
+
+	return newHistory;
 }
 
 function addLetter(state, character) {
@@ -89,16 +112,48 @@ function removeLetter(state) {
 	return state;
 }
 
+function nextWord(state) {
+	if (state.wordPos < state.words.length - 1) {
+		state.letterPos = 0;
+		state.wordPos++;
+	}
+	return state;
+}
+
 function Word({ word }) {
 	return (
 		<div>
-			{word.map((letter, i) => (
-				<letter className="text-3xl" key={i.toString()}>
-					{letter.character}
-				</letter>
-			))}
+			{word.map((letter, i) => {
+				let colorClass = getLetterColor(letter.status);
+
+				return (
+					<letter
+						className={"text-3xl " + colorClass}
+						key={i.toString()}
+					>
+						{letter.character}
+					</letter>
+				);
+			})}
 		</div>
 	);
+}
+
+function getLetterColor(status) {
+	let colorClass;
+	switch (status) {
+		case "untyped":
+			colorClass = "text-blue-400";
+			break;
+		case "valid":
+			colorClass = "text-green-400";
+			break;
+		case "invalid":
+			colorClass = "text-red-400";
+			break;
+	}
+
+	return colorClass;
 }
 
 function GetWords(txt) {
@@ -117,6 +172,7 @@ function GetWords(txt) {
 			});
 		}
 	}
+	output.push(currWord)
 	return output;
 }
 
