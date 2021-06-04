@@ -21,5 +21,12 @@ export default function MainArea(props) {
 }
 
 function calcWPM(stateHistory) {
-	return 8
+	let startTime = stateHistory[0].timeStamp;
+	let endTime = stateHistory[stateHistory.length - 1].timeStamp;
+
+	let timeTaken = endTime - startTime
+
+	let wordCount = stateHistory[0].words.length
+
+	return Math.floor(wordCount * 60/(timeTaken/1000))
 }
