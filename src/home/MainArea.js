@@ -16,7 +16,7 @@ export default function MainArea(props) {
 			/>
 		);
 	} else {
-		return <h1>WPM: {WPM}</h1>;
+		return <h1>WPM: {WPM} this is a test</h1>;
 	}
 }
 
