@@ -21,6 +21,6 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        server: ftp://ftp.checky.uk/
+        server: ftp.checky.uk/
         username: u108222632.ripytide_bot
         password: ${{ secrets.ftp_password }}
