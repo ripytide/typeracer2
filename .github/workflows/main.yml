@@ -22,5 +22,5 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
         server: ftp://checky.uk
-        username: ripytide_bot
+        username: u108222632.ripytide_bot
         password: ${{ secrets.ftp_password }}
