@@ -9,7 +9,13 @@ export default function Typer(props) { //required props are text:string and fini
 			letterPos: 0,
 		},
 	]);
+
 	let state = stateHistory[stateHistory.length - 1];
+
+	useEffect(() => {
+		let onLastLetter = state.letterPos === state.words[state.wordPos].length && state.wordPos === state.words.length - 1
+		if (onLastLetter) props.finished(stateHistory)
+	})
 
 	useEffect(() => {
 		//executed when component mounts
@@ -27,7 +33,9 @@ export default function Typer(props) { //required props are text:string and fini
 					dispatch({ type: "nextWord" });
 					break;
 				default:
-					dispatch({ type: "addLetter", character: e.key, finished: props.finished });
+					if (isValidCharacter(e.key)){
+						dispatch({ type: "addLetter", character: e.key});
+					}
 			}
 		}
 	}, [props.finished]);
@@ -64,15 +72,11 @@ function reducer(oldStateHistory, action) {
 
 	newHistory.push(newState);
 
-	let onLastLetter = newState.letterPos === newState.words[newState.wordPos].length && newState.wordPos === newState.words.length - 1
-	if (onLastLetter) action.finished(newHistory)
 
 	return newHistory;
 }
 
 function addLetter(state, character) {
-	if (!isValidCharacter(character)) return state;
-
 	let currWord = state.words[state.wordPos]; //get a reference to the currentWord
 
 	if (state.letterPos < currWord.length) {

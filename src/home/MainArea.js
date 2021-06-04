@@ -8,7 +8,7 @@ export default function MainArea(props) {
 	if (typing) {
 		return (
 			<Typer
-				text="hi there"
+				text="i am a fast boiiii as fuck boiii"
 				finished={(stateHistory) => {
 					setWPM(calcWPM(stateHistory));
 					setTyping(false);
