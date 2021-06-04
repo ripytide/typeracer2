@@ -2,6 +2,7 @@
   "name": "typeracer2",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/typeracer2",
   "dependencies": {
     "@craco/craco": "^6.1.2",
     "@testing-library/jest-dom": "^5.12.0",
