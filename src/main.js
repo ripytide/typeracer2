@@ -1,6 +1,6 @@
 import React from "react";
 import {
-	BrowserRouter as Router,
+	BrowserRouter,
 	Switch,
 	Route,
 	Link
@@ -11,19 +11,16 @@ import About from "./about/about.js";
 
 export default function App() {
   return (
-    <Router>
+    <BrowserRouter basename="/typeracer2">
       <div className='w-screen flex justify-center'>
 	  <div className='w-1/2 flex flex-col space-y-12'>
         <nav>
           <ul className='w-full flex flex-row justify-around'>
             <li>
-              <Link to="/typeracer2/">Home</Link>
+              <Link to="/">Home</Link>
             </li>
             <li>
-              <Link to="/typeracer2/about">About</Link>
-            </li>
-            <li>
-              <Link to="/users">Users</Link>
+              <Link to="/about">About</Link>
             </li>
           </ul>
         </nav>
@@ -39,6 +36,6 @@ export default function App() {
 
       </div>
 	  </div>
-    </Router>
+    </BrowserRouter>
   );
 }
