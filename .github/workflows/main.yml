@@ -25,4 +25,4 @@ jobs:
         username: u108222632.ripytide_bot
         password: ${{ secrets.ftp_password }}
         local-dir: ./build/
-        server-dir: typeracer2
+        server-dir: typeracer2/
