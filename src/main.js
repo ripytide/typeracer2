@@ -17,10 +17,10 @@ export default function App() {
         <nav>
           <ul className='w-full flex flex-row justify-around'>
             <li>
-              <Link to="/">Home</Link>
+              <Link to="/typeracer2/">Home</Link>
             </li>
             <li>
-              <Link to="/about">About</Link>
+              <Link to="/typeracer2/about">About</Link>
             </li>
             <li>
               <Link to="/users">Users</Link>
@@ -29,7 +29,7 @@ export default function App() {
         </nav>
 
         <Switch>
-          <Route path="/">
+          <Route path="/typeracer2/">
             <Home/>
           </Route>
           <Route path="/about">
