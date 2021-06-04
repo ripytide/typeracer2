@@ -26,7 +26,7 @@ export default function App() {
         </nav>
 
         <Switch>
-          <Route path="/typeracer2/">
+          <Route path="/">
             <Home/>
           </Route>
           <Route path="/about">
