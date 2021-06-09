@@ -1,8 +1,7 @@
 import React, { useEffect, useReducer } from "react";
 import cloneDeep from "lodash/cloneDeep";
 
-export default function Typer(props) {
-	//required props are text:string and finished:callback_function
+export default function Typer(props) { //required props are text:string and finished:callback_function
 	const [stateHistory, dispatch] = useReducer(reducer, [
 		{
 			words: GetWords(props.text),
@@ -15,11 +14,9 @@ export default function Typer(props) {
 	let state = stateHistory[stateHistory.length - 1];
 
 	useEffect(() => {
-		let onLastLetter =
-			state.letterPos === state.words[state.wordPos].length &&
-			state.wordPos === state.words.length - 1;
-		if (onLastLetter) props.finished(stateHistory);
-	});
+		let onLastLetter = state.letterPos === state.words[state.wordPos].length && state.wordPos === state.words.length - 1
+		if (onLastLetter) props.finished(stateHistory)
+	})
 
 	useEffect(() => {
 		//executed when component mounts
@@ -37,8 +34,8 @@ export default function Typer(props) {
 					dispatch({ type: "nextWord" });
 					break;
 				default:
-					if (isValidCharacter(e.key)) {
-						dispatch({ type: "addLetter", character: e.key });
+					if (isValidCharacter(e.key)){
+						dispatch({ type: "addLetter", character: e.key});
 					}
 			}
 		}
@@ -55,11 +52,11 @@ export default function Typer(props) {
 
 function reducer(oldStateHistory, action) {
 	//create a shallow copy for immutability sake and so react does not bail out of re-rendering due to the refernce not changing
-	let newHistory = [...oldStateHistory];
+	let newHistory = [...oldStateHistory]
 
 	let newState = cloneDeep(newHistory[newHistory.length - 1]);
 
-	newState.timeStamp = Date.now();
+	newState.timeStamp = Date.now()
 
 	switch (action.type) {
 		case "addLetter":
@@ -76,6 +73,7 @@ function reducer(oldStateHistory, action) {
 	}
 
 	newHistory.push(newState);
+
 
 	return newHistory;
 }
@@ -181,7 +179,7 @@ function GetWords(txt) {
 			});
 		}
 	}
-	output.push(currWord);
+	output.push(currWord)
 	return output;
 }
 
