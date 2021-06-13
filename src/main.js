@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {
 	BrowserRouter,
 	Switch,
@@ -8,11 +8,18 @@ import {
 
 import Home from "./home/home.js";
 import About from "./about/about.js";
+import SwitcherToggler from "./SwitcherToggler.js";
 
 export default function App() {
+	return (<Inards/>)
+}
+
+function Inards() {
   return (
-    <BrowserRouter basename="/typeracer2">
-      <div className='w-screen flex justify-center'>
+	  <>
+	  <SwitcherToggler/>
+    <BrowserRouter basename="/">
+      <div className='w-screen flex justify-center' data-testid="app">
 	  <div className='w-1/2 flex flex-col space-y-12'>
         <nav>
           <ul className='w-full flex flex-row justify-around'>
@@ -37,5 +44,6 @@ export default function App() {
       </div>
 	  </div>
     </BrowserRouter>
+	  </>
   );
 }

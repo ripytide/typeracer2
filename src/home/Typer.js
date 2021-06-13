@@ -133,12 +133,12 @@ function Word({ word }) {
 				let colorClass = getLetterColor(letter.status);
 
 				return (
-					<letter
+					<span
 						className={"text-3xl " + colorClass}
 						key={i.toString()}
 					>
 						{letter.character}
-					</letter>
+					</span>
 				);
 			})}
 		</div>
