@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useContext } from 'react'
+import { themeContext } from './main.js'
+import themes from './themes.js'
 
-export default function Switcher({themes}){
-	let themeDivs = themes.map((theme) => {
-		return(
-			<div key={theme.name} data-testid={theme.name}>{theme.name}</div>
+export default function Switcher() {
+	const Theme = useContext(themeContext)
+
+	let themeDivs = []
+	for (let themeName in themes) {
+		themeDivs.push(
+			<div key={themeName} onClick={() => Theme.changeTheme(themeName)}>
+				{themeName}
+			</div>
 		)
-	})
+	}
 
-	return(
+	return (
 		<div className='w-32 h-12' data-testid='switcher'>
 			{themeDivs}
 		</div>
