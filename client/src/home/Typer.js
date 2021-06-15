@@ -69,14 +69,14 @@ function Word({ word, showCaret, caretPos }) {
 				let colorClass = getLetterColor(letter.status)
 				return (
 					<>
-						{showCaret && caretPos === i ? <Caret /> : null}
+						{showCaret && caretPos === i ? <Caret key={'caret'}/> : null}
 						<span className={'text-3xl ' + colorClass} key={i.toString()}>
 							{letter.character}
 						</span>
 					</>
 				)
 			})}
-			{showCaret && caretPos >= word.length ? <Caret /> : null}
+			{showCaret && caretPos >= word.length ? <Caret key={'caret'}/> : null}
 		</div>
 	)
 }
