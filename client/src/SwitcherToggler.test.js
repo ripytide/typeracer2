@@ -1,7 +1,6 @@
 import React from 'react'
 import { act } from 'react-dom/test-utils'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { enableFetchMocks, resetMocks } from 'jest-fetch-mock'
 import SwitcherToggler from './SwitcherToggler.js'
 
 function pressKey(key) {
@@ -9,11 +8,6 @@ function pressKey(key) {
 }
 
 describe('Theme Switcher', () => {
-	beforeEach(() => {
-		enableFetchMocks()
-		resetMocks()
-		fetch.mockResponse(JSON.stringify([{ name: 'dark' }]))
-	})
 	test('Theme switcher should not be visible by default', async () => {
 		await act(async () => {
 			render(<SwitcherToggler />)
