@@ -24,7 +24,7 @@ export default function Typer(props) {
 			state.letterPos === state.words[state.wordPos].length &&
 			state.wordPos === state.words.length - 1
 		if (onLastLetter) props.finished(stateHistory)
-	})
+	}, [state, stateHistory, props])
 
 	useEffect(() => {
 		//executed when component mounts
@@ -54,20 +54,26 @@ export default function Typer(props) {
 	const [opponents, setOpponents] = useState([])
 
 	useEffect(() => {
-		socket.emit('update', state.letterPos, state.wordPos)
-	})
+		socket.emit('update-in', props.nickname, state.letterPos, state.wordPos)
+	}, [state, socket])
 
 	useEffect(() => {
 		socket.emit('join', props.roomId)
-		socket.on('update-out', (nickname, opponentData) => {
+		socket.on('update-out', (oppLetterPos, oppWordPos) => {
+			console.log('update recieved');
 			setOpponents((oldOppenets) => {
 				const newOpponents = [...oldOppenets]
-				let index = newOpponents.find((opp) => opp.nickname === nickname)
+				let index = newOpponents.find((opp) => opp.nickname === oppNickname)
 
 				if (index !== undefined) {
-					newOpponents[index] = opponentData
+					newOpponents[index].letterPos = oppLetterPos
+					newOpponents[index].wordPos = oppWordPos
 				} else {
-					newOpponents.push(opponentData)
+					newOpponents.push({
+						nickname: oppNickname,
+						letterPos: oppLetterPos,
+						wordPos: oppWordPos,
+					})
 				}
 				return newOpponents
 			})
@@ -127,7 +133,6 @@ function reducer(oldStateHistory, action) {
 		newState.timeStamp = Date.now()
 
 		doAction(newState, action)
-
 		newHistory.push(newState)
 
 		return newHistory

@@ -32,5 +32,6 @@ io.on('connection', (socket) => {
 
 	socket.on('update-in', (letterPos, wordPos) => {
 		console.log(`User: ${socket.nickname}, Letter Posistion is: ${letterPos}, Word Posistion is: ${wordPos}`);
+		socket.broadcast.emit('update-out', letterPos, wordPos)
 	})
 })
