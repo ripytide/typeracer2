@@ -1,8 +1,12 @@
 import cloneDeep from 'lodash/cloneDeep'
-import React, {useEffect, useReducer} from 'react'
+import React, { useEffect, useReducer, useState } from 'react'
 import Caret from './Caret.js'
+import io from 'socket.io-client'
+import config from '../config.json'
 
 export default function Typer(props) {
+	//local relevant stuff
+
 	//required props are text:string and finished:callback_function
 	const [stateHistory, dispatch] = useReducer(reducer, [
 		{
@@ -45,67 +49,117 @@ export default function Typer(props) {
 		}
 	}, [props.finished])
 
+	//multiplayer relevant stuff
+	const [socket] = useState(() => io(config.ENDPOINT))
+	const [opponents, setOpponents] = useState([])
+
+	useEffect(() => {
+		socket.emit('update', state.letterPos, state.wordPos)
+	})
+
+	useEffect(() => {
+		socket.emit('join', props.roomId)
+		socket.on('update-out', (nickname, opponentData) => {
+			setOpponents((oldOppenets) => {
+				const newOpponents = [...oldOppenets]
+				let index = newOpponents.find((opp) => opp.nickname === nickname)
+
+				if (index !== undefined) {
+					newOpponents[index] = opponentData
+				} else {
+					newOpponents.push(opponentData)
+				}
+				return newOpponents
+			})
+		})
+	}, [socket, props.roomId])
+
 	return (
 		<div className='relative flex flex-wrap justify-start gap-x-1'>
 			{state.words.map((word, i) => {
-				let isCurrentWord = state.wordPos === i
+				const relevantOpps = opponents.filter((opp) => opp.wordPos === i)
+				const relevantCarets = relevantOpps.map((opp) => {
+					return { letterPos: opp.letterPos }
+				})
+
+				if (state.wordPos === i)
+					relevantCarets.push({ letterPos: state.letterPos })
+
 				return (
-					<Word
-						word={word}
-						key={i.toString()}
-						showCaret={isCurrentWord}
-						caretPos={isCurrentWord ? state.letterPos : undefined}
-					/>
+					<Word word={word} caretInfos={relevantCarets} key={i.toString()} />
 				)
 			})}
 		</div>
 	)
 }
 
-function Word({ word, showCaret, caretPos }) {
+function Word({ word, caretInfos }) {
 	return (
 		<div>
 			{word.map((letter, i) => {
 				let colorClass = getLetterColor(letter.status)
 				return (
 					<>
-						{showCaret && caretPos === i ? <Caret key={'caret'}/> : null}
+						{caretInfos
+							.filter((caret) => caret.letterPos === i)
+							.map((caret) => (
+								<Caret />
+							))}
 						<span className={'text-3xl ' + colorClass} key={i.toString()}>
 							{letter.character}
 						</span>
 					</>
 				)
 			})}
-			{showCaret && caretPos >= word.length ? <Caret key={'caret'}/> : null}
+			{caretInfos
+				.filter((caret) => caret.letterPos >= word.length)
+				.map((caret) => (
+					<Caret />
+				))}
 		</div>
 	)
 }
 
 function reducer(oldStateHistory, action) {
-	//create a shallow copy for immutability sake and so react does not bail out of re-rendering due to the refernce not changing
-	let newHistory = [...oldStateHistory]
+	if (canDoAction(oldStateHistory[oldStateHistory.length - 1], action)) {
+		let newHistory = [...oldStateHistory]
+		let newState = cloneDeep(newHistory[newHistory.length - 1])
+		newState.timeStamp = Date.now()
 
-	let newState = cloneDeep(newHistory[newHistory.length - 1])
+		doAction(newState, action)
 
-	newState.timeStamp = Date.now()
+		newHistory.push(newState)
 
+		return newHistory
+	} else {
+		return oldStateHistory
+	}
+}
+
+function canDoAction(state, action) {
 	switch (action.type) {
 		case 'addLetter':
-			addLetter(newState, action.character)
-			break
+			return isValidCharacter(action.character)
 		case 'removeLetter':
-			removeLetter(newState)
-			break
+			return state.letterPos > 0
 		case 'nextWord':
-			nextWord(newState)
-			break
+			return state.wordPos < state.words.length - 1
 		default:
-			throw new Error('That is not a vailid action type: ' + action.type)
+			throw new Error(`Not a valid actionType: ${action}`)
 	}
+}
 
-	newHistory.push(newState)
-
-	return newHistory
+function doAction(state, action) {
+	switch (action.type) {
+		case 'addLetter':
+			return addLetter(state, action.character)
+		case 'removeLetter':
+			return removeLetter(state)
+		case 'nextWord':
+			return nextWord(state)
+		default:
+			throw new Error(`invalid action type: ${action.type}`)
+	}
 }
 
 function addLetter(state, character) {
@@ -126,33 +180,25 @@ function addLetter(state, character) {
 			status: 'invalid',
 		})
 	}
-
 	state.letterPos++
-
 	return state
 }
 
 function removeLetter(state) {
 	let currWord = state.words[state.wordPos]
 
-	if (state.letterPos > 0) {
-		if (currWord[state.letterPos - 1].original) {
-			currWord[state.letterPos - 1].status = 'untyped'
-		} else {
-			currWord.pop()
-		}
-
-		state.letterPos--
+	if (currWord[state.letterPos - 1].original) {
+		currWord[state.letterPos - 1].status = 'untyped'
+	} else {
+		currWord.pop()
 	}
-
+	state.letterPos--
 	return state
 }
 
 function nextWord(state) {
-	if (state.wordPos < state.words.length - 1) {
-		state.letterPos = 0
-		state.wordPos++
-	}
+	state.letterPos = 0
+	state.wordPos++
 	return state
 }
 
