@@ -55,12 +55,12 @@ export default function Typer(props) {
 
 	useEffect(() => {
 		socket.emit('update-in', props.nickname, state.letterPos, state.wordPos)
-	}, [state, socket])
+	}, [state, socket, props.nickname])
 
 	useEffect(() => {
 		socket.emit('join', props.roomId)
-		socket.on('update-out', (oppLetterPos, oppWordPos) => {
-			console.log('update recieved');
+		socket.on('update-out', (oppNickname, oppLetterPos, oppWordPos) => {
+			console.log('update recieved')
 			setOpponents((oldOppenets) => {
 				const newOpponents = [...oldOppenets]
 				let index = newOpponents.find((opp) => opp.nickname === oppNickname)
@@ -100,29 +100,34 @@ export default function Typer(props) {
 }
 
 function Word({ word, caretInfos }) {
+	const output = word.map((letter, i) => {
+		return (
+			<Letter
+				character={letter.character}
+				status={letter.status}
+				key={i.toString()}
+			/>
+		)
+	})
+
+	//sort carets into decending order so we can insert them into the letters
+	const sortedCarets = caretInfos.sort(
+		(firstEl, secondEl) => secondEl.letterPos - firstEl.letterPos
+	)
+
+	//instert carets into the letters array
+	sortedCarets.forEach((caret) => output.splice(caret.letterPos, 0, <Caret key={"caret"}/>))
+
 	return (
 		<div>
-			{word.map((letter, i) => {
-				let colorClass = getLetterColor(letter.status)
-				return (
-					<>
-						{caretInfos
-							.filter((caret) => caret.letterPos === i)
-							.map((caret) => (
-								<Caret />
-							))}
-						<span className={'text-3xl ' + colorClass} key={i.toString()}>
-							{letter.character}
-						</span>
-					</>
-				)
-			})}
-			{caretInfos
-				.filter((caret) => caret.letterPos >= word.length)
-				.map((caret) => (
-					<Caret />
-				))}
+			{output}
 		</div>
+	)
+}
+
+function Letter({ character, status }) {
+	return (
+		<span className={'text-3xl ' + getLetterColor(status)}>{character}</span>
 	)
 }
 

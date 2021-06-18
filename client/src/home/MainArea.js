@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import Typer from './Typer.js'
+import RoomChooser from './RoomChooser.js'
+import NicknameChooser from './NicknameChooser.js'
 
 export default function MainArea(props) {
-	const [typing, setTyping] = useState(false)
+	const [typing, setTyping] = useState(true)
 	const [WPM, setWPM] = useState(0)
 	const [roomChosen, setRoomChosen] = useState(false)
 	const [haveNickname, setHaveNickname] = useState(false);
