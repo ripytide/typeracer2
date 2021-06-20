@@ -2,7 +2,7 @@ import React, {createContext, useState} from 'react'
 import {BrowserRouter, Link, Route, Switch} from 'react-router-dom'
 import About from './about/about.js'
 import Home from './home/home.js'
-import SwitcherToggler from './SwitcherToggler.js'
+import ThemeMenuToggler from './ThemeMenuToggler.js'
 import themes from './themes.js'
 
 
@@ -21,7 +21,7 @@ export default function App() {
 function Inards() {
 	return (
 		<>
-			<SwitcherToggler />
+			<ThemeMenuToggler />
 			<BrowserRouter basename='/'>
 				<div className='flex justify-center w-screen' data-testid='app'>
 					<div className='flex flex-col w-1/2 space-y-12'>

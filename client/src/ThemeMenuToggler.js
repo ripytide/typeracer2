@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import Switcher from './Switcher.js'
+import Picker from './Picker.js'
+import themes from './Themes.json'
 
 export default function SwitcherToggler(){
 	const [shown, setShown] = useState(false)
 
 	useEffect(() => {
-		let KeyDown = (e) => {
+		const KeyDown = (e) => {
 			if (e.key === 'Escape'){
 				setShown((s) => !s)
 			}
@@ -15,7 +16,7 @@ export default function SwitcherToggler(){
 	}, [])
 
 	if (shown) {
-		return <Switcher/>
+		return <Picker items={themes.map((theme) => theme.name)} callback={() => undefined}/>
 	} else {
 		return null
 	}

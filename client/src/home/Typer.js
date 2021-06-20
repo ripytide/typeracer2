@@ -1,16 +1,13 @@
 import cloneDeep from 'lodash/cloneDeep'
 import React, { useEffect, useReducer, useState } from 'react'
 import Caret from './Caret.js'
-import io from 'socket.io-client'
-import config from '../config.json'
 
-export default function Typer(props) {
+export default function Typer({ text, finished, socket }) {
 	//local relevant stuff
 
-	//required props are text:string and finished:callback_function
 	const [stateHistory, dispatch] = useReducer(reducer, [
 		{
-			words: GetWords(props.text),
+			words: GetWords(text),
 			wordPos: 0,
 			letterPos: 0,
 			timeStamp: Date.now(),
@@ -23,8 +20,8 @@ export default function Typer(props) {
 		let onLastLetter =
 			state.letterPos === state.words[state.wordPos].length &&
 			state.wordPos === state.words.length - 1
-		if (onLastLetter) props.finished(stateHistory)
-	}, [state, stateHistory, props])
+		if (onLastLetter) finished(stateHistory)
+	}, [state, stateHistory, finished])
 
 	useEffect(() => {
 		//executed when component mounts
@@ -47,18 +44,11 @@ export default function Typer(props) {
 					}
 			}
 		}
-	}, [props.finished])
+	}, [finished])
 
-	//multiplayer relevant stuff
-	const [socket] = useState(() => io(config.ENDPOINT))
 	const [opponents, setOpponents] = useState([])
 
 	useEffect(() => {
-		socket.emit('update-in', props.nickname, state.letterPos, state.wordPos)
-	}, [state, socket, props.nickname])
-
-	useEffect(() => {
-		socket.emit('join', props.roomId)
 		socket.on('update-out', (oppNickname, oppLetterPos, oppWordPos) => {
 			console.log('update recieved')
 			setOpponents((oldOppenets) => {
@@ -78,7 +68,11 @@ export default function Typer(props) {
 				return newOpponents
 			})
 		})
-	}, [socket, props.roomId])
+	}, [socket])
+
+	useEffect(() => {
+		socket.emit('update-in', state.letterPos, state.wordPos)
+	}, [state, socket])
 
 	return (
 		<div className='relative flex flex-wrap justify-start gap-x-1'>
@@ -116,13 +110,11 @@ function Word({ word, caretInfos }) {
 	)
 
 	//instert carets into the letters array
-	sortedCarets.forEach((caret) => output.splice(caret.letterPos, 0, <Caret key={"caret"}/>))
-
-	return (
-		<div>
-			{output}
-		</div>
+	sortedCarets.forEach((caret) =>
+		output.splice(caret.letterPos, 0, <Caret key={'caret'} />)
 	)
+
+	return <div>{output}</div>
 }
 
 function Letter({ character, status }) {
