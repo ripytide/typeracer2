@@ -1,7 +1,7 @@
 on: push
 name: 🚀 Deploy website on push
 jobs:
-  web-deploy:
+  client-deploy:
     name: 🎉 Deploy
     runs-on: ubuntu-latest
     steps:
@@ -15,6 +15,7 @@ jobs:
       
     - name: 🔨 Build Project
       run: |
+        cd client
         npm install
         npm run build
     
