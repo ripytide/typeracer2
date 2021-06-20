@@ -40,7 +40,15 @@ export default function MainArea() {
 			/>
 		)
 	} else if (!room) {
-		return <Picker items={['room 1', 'room 2']} callback={setRoom} />
+		return (
+			<Picker
+				items={['room 1', 'room 2']}
+				callback={(room) => {
+					setRoom(room)
+					socket.emit('join', room)
+				}}
+			/>
+		)
 	} else if (typing && socket) {
 		return (
 			<Typer

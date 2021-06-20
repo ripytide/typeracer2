@@ -26,10 +26,11 @@ io.on('connection', (socket) => {
 	console.log('new connection')
 
 	socket.on('register', (nickname, callback) => {
-		if (
+		const validNickname =
 			nickname.length > 3 &&
 			players.find((soc) => soc.nickname === nickname) === undefined
-		) {
+
+		if (validNickname) {
 			socket.nickname = nickname
 			players.push(socket)
 			console.log(`New Player: ${nickname}, successfully registed!`)
@@ -46,18 +47,18 @@ io.on('connection', (socket) => {
 		if (i !== -1) {
 			players.splice(i, 1)
 			console.log(`Player ${socket.nickname}, has disconnected!`)
-			console.log(`There are now ${players.length} players in total.`);
+			console.log(`There are now ${players.length} players in total.`)
 		}
 	})
 
 	socket.on('join', (room) => {
 		socket.join(room)
-		console.log(`socket: ${socket.nickname} has joined room: ${room}`)
+		console.log(`Player: ${socket.nickname}, has joined room: ${room}`)
 	})
 
 	socket.on('update-in', (letterPos, wordPos) => {
 		console.log(
-			`User: ${socket.nickname}, Letter Posistion is: ${letterPos}, Word Posistion is: ${wordPos}`
+			`Player: ${socket.nickname}, Letter Position is: ${letterPos}, Word Position is: ${wordPos}`
 		)
 		socket.broadcast.emit('update-out', letterPos, wordPos)
 	})
