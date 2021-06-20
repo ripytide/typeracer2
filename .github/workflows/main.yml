@@ -1,9 +1,13 @@
 on: push
 name: 🚀 Deploy website on push
 jobs:
-  web-deploy:
+  client-deploy:
     name: 🎉 Deploy
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v2
@@ -24,5 +28,5 @@ jobs:
         server: ftp.checky.uk
         username: u108222632.ripytide_bot
         password: ${{ secrets.ftp_password }}
-        local-dir: ./build/
+        local-dir: client/build/
         server-dir: typeracer2/
