@@ -12,10 +12,6 @@ const io = new Server(server, {
 	},
 })
 
-app.get('/', (req, res) => {
-	res.send('<h1>hello world</h1>')
-})
-
 server.listen(1234, () => {
 	console.log('listening on 1234')
 })
@@ -42,10 +38,12 @@ io.on('connection', (socket) => {
 		}
 	})
 
-	socket.on('disconnect', () => {
+	socket.on('disconnecting', () => {
 		const i = players.indexOf(socket)
 		if (i !== -1) {
+			debugger
 			players.splice(i, 1)
+			socket.broadcast.to(getRoom(socket)).emit('leave', socket.nickname)
 			console.log(`Player ${socket.nickname}, has disconnected!`)
 			console.log(`There are now ${players.length} players in total.`)
 		}

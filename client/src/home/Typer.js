@@ -50,7 +50,6 @@ export default function Typer({ text, finished, socket }) {
 
 	useEffect(() => {
 		socket.on('update-out', (oppNickname, oppLetterPos, oppWordPos) => {
-			console.log('update recieved')
 			setOpponents((oldOppenets) => {
 				const newOpponents = [...oldOppenets]
 				const opp = newOpponents.find((opp) => opp.nickname === oppNickname)
@@ -69,6 +68,19 @@ export default function Typer({ text, finished, socket }) {
 			})
 		})
 	}, [socket])
+
+	useEffect(() => {
+		socket.on('leave', (oppNickname) => {
+			setOpponents((oldOppenets) => {
+				const newOpponents = [...oldOppenets]
+				const index = newOpponents.findIndex((opp) => opp.nickname === oppNickname)
+
+				if (index >= 0) newOpponents.splice(index, 1)
+
+				return newOpponents
+			})
+		})
+	})
 
 	useEffect(() => {
 		socket.emit('update-in', state.letterPos, state.wordPos)
