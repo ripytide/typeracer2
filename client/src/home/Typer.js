@@ -73,7 +73,9 @@ export default function Typer({ text, finished, socket }) {
 		socket.on('leave', (oppNickname) => {
 			setOpponents((oldOppenets) => {
 				const newOpponents = [...oldOppenets]
-				const index = newOpponents.findIndex((opp) => opp.nickname === oppNickname)
+				const index = newOpponents.findIndex(
+					(opp) => opp.nickname === oppNickname
+				)
 
 				if (index >= 0) newOpponents.splice(index, 1)
 
@@ -90,21 +92,17 @@ export default function Typer({ text, finished, socket }) {
 		const relevantOpps = opponents.filter((opp) => opp.wordPos === i)
 
 		const relevantCarets = relevantOpps.map((opp) => {
-			return { letterPos: opp.letterPos }
+			return { nickname: opp.nickname, letterPos: opp.letterPos }
 		})
 
 		if (state.wordPos === i)
-			relevantCarets.push({ letterPos: state.letterPos })
+			relevantCarets.push({ nickname: 'x', letterPos: state.letterPos })
 
-		return (
-			<Word word={word} caretInfos={relevantCarets} key={i.toString()} />
-		)
+		return <Word word={word} caretInfos={relevantCarets} key={i.toString()} />
 	})
 
 	return (
-		<div className='relative flex flex-wrap justify-start gap-x-1'>
-			{Words}
-		</div>
+		<div className='relative flex flex-wrap justify-start gap-x-1'>{Words}</div>
 	)
 }
 
@@ -126,7 +124,7 @@ function Word({ word, caretInfos }) {
 
 	//instert carets into the letters array
 	sortedCarets.forEach((caret) =>
-		output.splice(caret.letterPos, 0, <Caret key={'caret'} />)
+		output.splice(caret.letterPos, 0, <Caret key={caret.nickname} />)
 	)
 
 	return <div>{output}</div>
