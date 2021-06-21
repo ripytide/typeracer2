@@ -43,20 +43,33 @@ io.on('connection', (socket) => {
 		if (i !== -1) {
 			debugger
 			players.splice(i, 1)
-			socket.broadcast.to(getRoom(socket)).emit('leave', socket.nickname)
+			socket.broadcast.to(getRoom(socket)).emit('opponent-left', socket.nickname)
 			console.log(`Player ${socket.nickname}, has disconnected!`)
 			console.log(`There are now ${players.length} players in total.`)
 		}
 	})
 
 	socket.on('join', (room) => {
+		const otherRoomPlayers = players.filter((soc) => soc.room === room)
+		
 		socket.join(room)
+		socket.room = room
 		console.log(`Player: ${socket.nickname}, has joined room: ${room}`)
+
+		const opponents = otherRoomPlayers.map((soc) => ({
+			nickname: soc.nickname,
+			letterPos: soc.letterPos, 
+			wordPos: soc.wordPos, 
+		}))
+
+		socket.emit('opponent-data', opponents)
 	})
 
 	socket.on('update-in', (letterPos, wordPos) => {
+		socket.letterPos = letterPos
+		socket.wordPos = wordPos
 		console.log(
-			`Player: ${socket.nickname}, Letter Position is: ${letterPos}, Word Position is: ${wordPos}`
+			`Player: ${socket.nickname}, Letter Position is: ${socket.letterPos}, Word Position is: ${socket.wordPos}`
 		)
 		socket.broadcast
 			.to(getRoom(socket))

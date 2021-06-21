@@ -1,8 +1,8 @@
 import cloneDeep from 'lodash/cloneDeep'
 import React, { useEffect, useReducer, useState } from 'react'
-import Typer from './Typer.js'
 import OpponentList from './OpponentList.js'
 import Podium from './Podium.js'
+import Typer from './Typer.js'
 
 export default function TypingArea({ socket, nickname, room }) {
 	//local relevant stuff
@@ -59,8 +59,8 @@ export default function TypingArea({ socket, nickname, room }) {
 
 	useEffect(() => {
 		socket.on('update-out', (oppNickname, oppLetterPos, oppWordPos) => {
-			setOpponentData((oldOppenetData) => {
-				const newOpponentData = { ...oldOppenetData }
+			setOpponentData((oldOpponentData) => {
+				const newOpponentData = { ...oldOpponentData }
 				const opponent = newOpponentData.opponents.find(
 					(_opponent) => _opponent.nickname === oppNickname
 				)
@@ -84,9 +84,9 @@ export default function TypingArea({ socket, nickname, room }) {
 	}, [socket])
 
 	useEffect(() => {
-		socket.on('leave', (oppNickname) => {
-			setOpponentData((oldOppenetData) => {
-				const newOpponentData = { ...oldOppenetData }
+		socket.on('opponent-left', (oppNickname) => {
+			setOpponentData((oldOppnentData) => {
+				const newOpponentData = { ...oldOppnentData }
 				const index = newOpponentData.opponents.findIndex(
 					(opp) => opp.nickname === oppNickname
 				)
@@ -96,7 +96,18 @@ export default function TypingArea({ socket, nickname, room }) {
 				return newOpponentData
 			})
 		})
-	})
+	}, [socket])
+
+	useEffect(() => {
+		socket.on('opponent-data', (opponents) => {
+			setOpponentData((oldOpponentData) => {
+				const newOpponentData = {...oldOpponentData}
+				newOpponentData.opponents = opponents
+				updatePodium(newOpponentData.podium, opponents)
+				return newOpponentData
+			})
+		})
+	}, [socket])
 
 	useEffect(() => {
 		socket.emit('update-in', typingState.letterPos, typingState.wordPos)
@@ -235,7 +246,7 @@ function updatePodium(podium, opponents) {
 			}
 		}
 	})
-	
+
 	if (sortedOpponents[0]) {
 		podium.first = sortedOpponents[0]
 	}
