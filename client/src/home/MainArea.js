@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import Typer from './Typer.js'
+import TypingArea from './TypingArea.js'
 import Picker from '../Picker.js'
 import io from 'socket.io-client'
 import config from '../config.json'
 import TextInput from '../TextInput.js'
 
 export default function MainArea() {
-	const [typing, setTyping] = useState(true)
-
-	const [WPM, setWPM] = useState(0)
-
 	const [room, setRoom] = useState(undefined)
 
 	const [nickname, setNickname] = useState(undefined)
@@ -49,29 +45,18 @@ export default function MainArea() {
 				}}
 			/>
 		)
-	} else if (typing && socket) {
-		return (
-			<Typer
-				text='i am a fast boiiii as fuck boiii'
-				finished={(stateHistory) => {
-					setWPM(calcWPM(stateHistory))
-					setTyping(false)
-				}}
-				socket={socket}
-			/>
-		)
 	} else {
-		return <h1>WPM: {WPM} this is a test</h1>
+		return <TypingArea socket={socket} nickname={nickname} room={room} />
 	}
 }
 
-function calcWPM(stateHistory) {
-	let startTime = stateHistory[0].timeStamp
-	let endTime = stateHistory[stateHistory.length - 1].timeStamp
+//function calcWPM(stateHistory) { TODO
+	//let startTime = stateHistory[0].timeStamp
+	//let endTime = stateHistory[stateHistory.length - 1].timeStamp
 
-	let timeTaken = endTime - startTime
+	//let timeTaken = endTime - startTime
 
-	let wordCount = stateHistory[0].words.length
+	//let wordCount = stateHistory[0].words.length
 
-	return Math.floor((wordCount * 60) / (timeTaken / 1000))
-}
+	//return Math.floor((wordCount * 60) / (timeTaken / 1000))
+//}
