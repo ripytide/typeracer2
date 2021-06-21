@@ -60,6 +60,16 @@ io.on('connection', (socket) => {
 		console.log(
 			`Player: ${socket.nickname}, Letter Position is: ${letterPos}, Word Position is: ${wordPos}`
 		)
-		socket.broadcast.emit('update-out', letterPos, wordPos)
+		socket.broadcast
+			.to(getRoom(socket))
+			.emit('update-out', socket.nickname, letterPos, wordPos)
 	})
 })
+
+function getRoom(socket) {
+	let room
+	socket.rooms.forEach((_room) => {
+		if (_room !== socket.id) room = _room
+	})
+	return room
+}

@@ -53,11 +53,11 @@ export default function Typer({ text, finished, socket }) {
 			console.log('update recieved')
 			setOpponents((oldOppenets) => {
 				const newOpponents = [...oldOppenets]
-				let index = newOpponents.find((opp) => opp.nickname === oppNickname)
+				const opp = newOpponents.find((opp) => opp.nickname === oppNickname)
 
-				if (index !== undefined) {
-					newOpponents[index].letterPos = oppLetterPos
-					newOpponents[index].wordPos = oppWordPos
+				if (opp !== undefined) {
+					opp.letterPos = oppLetterPos
+					opp.wordPos = oppWordPos
 				} else {
 					newOpponents.push({
 						nickname: oppNickname,
@@ -74,21 +74,24 @@ export default function Typer({ text, finished, socket }) {
 		socket.emit('update-in', state.letterPos, state.wordPos)
 	}, [state, socket])
 
+	const Words = state.words.map((word, i) => {
+		const relevantOpps = opponents.filter((opp) => opp.wordPos === i)
+
+		const relevantCarets = relevantOpps.map((opp) => {
+			return { letterPos: opp.letterPos }
+		})
+
+		if (state.wordPos === i)
+			relevantCarets.push({ letterPos: state.letterPos })
+
+		return (
+			<Word word={word} caretInfos={relevantCarets} key={i.toString()} />
+		)
+	})
+
 	return (
 		<div className='relative flex flex-wrap justify-start gap-x-1'>
-			{state.words.map((word, i) => {
-				const relevantOpps = opponents.filter((opp) => opp.wordPos === i)
-				const relevantCarets = relevantOpps.map((opp) => {
-					return { letterPos: opp.letterPos }
-				})
-
-				if (state.wordPos === i)
-					relevantCarets.push({ letterPos: state.letterPos })
-
-				return (
-					<Word word={word} caretInfos={relevantCarets} key={i.toString()} />
-				)
-			})}
+			{Words}
 		</div>
 	)
 }
