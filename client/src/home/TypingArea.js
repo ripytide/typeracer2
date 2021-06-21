@@ -4,7 +4,7 @@ import Typer from './Typer.js'
 import OpponentList from './OpponentList.js'
 import Podium from './Podium.js'
 
-export default function TypingArea({socket, nickname, room}) {
+export default function TypingArea({ socket, nickname, room }) {
 	//local relevant stuff
 
 	const [typingHistory, dispatch] = useReducer(reducer, [
@@ -19,10 +19,10 @@ export default function TypingArea({socket, nickname, room}) {
 	let typingState = typingHistory[typingHistory.length - 1]
 
 	//useEffect(() => {
-		//let onLastLetter =
-			//state.letterPos === state.words[state.wordPos].length &&
-			//state.wordPos === state.words.length - 1
-		//if (onLastLetter) finished(typingHistory)
+	//let onLastLetter =
+	//state.letterPos === state.words[state.wordPos].length &&
+	//state.wordPos === state.words.length - 1
+	//if (onLastLetter) finished(typingHistory)
 	//}, [state, typingHistory, finished])
 
 	useEffect(() => {
@@ -48,41 +48,52 @@ export default function TypingArea({socket, nickname, room}) {
 		}
 	}, [])
 
-	const [opponents, setOpponents] = useState([])
-	const [podium, setPodium] = useState({first:{nickname: 'bat'}, second:{nickname: 'not'}, third:{nickname: 'cool'}});
+	const [opponentData, setOpponentData] = useState({
+		podium: {
+			first: { nickname: '' },
+			second: { nickname: '' },
+			third: { nickname: '' },
+		},
+		opponents: [],
+	})
 
 	useEffect(() => {
 		socket.on('update-out', (oppNickname, oppLetterPos, oppWordPos) => {
-			setOpponents((oldOppenets) => {
-				const newOpponents = [...oldOppenets]
-				const opp = newOpponents.find((opp) => opp.nickname === oppNickname)
+			setOpponentData((oldOppenetData) => {
+				const newOpponentData = { ...oldOppenetData }
+				const opponent = newOpponentData.opponents.find(
+					(_opponent) => _opponent.nickname === oppNickname
+				)
 
-				if (opp !== undefined) {
-					opp.letterPos = oppLetterPos
-					opp.wordPos = oppWordPos
+				if (opponent !== undefined) {
+					opponent.letterPos = oppLetterPos
+					opponent.wordPos = oppWordPos
 				} else {
-					newOpponents.push({
+					newOpponentData.opponents.push({
 						nickname: oppNickname,
 						letterPos: oppLetterPos,
 						wordPos: oppWordPos,
 					})
 				}
-				return newOpponents
+
+				updatePodium(newOpponentData.podium, newOpponentData.opponents)
+
+				return newOpponentData
 			})
 		})
 	}, [socket])
 
 	useEffect(() => {
 		socket.on('leave', (oppNickname) => {
-			setOpponents((oldOppenets) => {
-				const newOpponents = [...oldOppenets]
-				const index = newOpponents.findIndex(
+			setOpponentData((oldOppenetData) => {
+				const newOpponentData = { ...oldOppenetData }
+				const index = newOpponentData.opponents.findIndex(
 					(opp) => opp.nickname === oppNickname
 				)
 
-				if (index >= 0) newOpponents.splice(index, 1)
+				if (index >= 0) newOpponentData.opponents.splice(index, 1)
 
-				return newOpponents
+				return newOpponentData
 			})
 		})
 	})
@@ -93,14 +104,18 @@ export default function TypingArea({socket, nickname, room}) {
 
 	return (
 		<>
-		<Typer
-			words={typingState.words}
-			letterPos={typingState.letterPos}
-			wordPos={typingState.wordPos}
-			opponents={opponents}
-		/>
-		<OpponentList opponents={opponents}/>
-		<Podium first={podium.first} second={podium.second} third={podium.third}/>
+			<Typer
+				words={typingState.words}
+				letterPos={typingState.letterPos}
+				wordPos={typingState.wordPos}
+				opponents={opponentData.opponents}
+			/>
+			<OpponentList opponents={opponentData.opponents} />
+			<Podium
+				first={opponentData.podium.first}
+				second={opponentData.podium.second}
+				third={opponentData.podium.third}
+			/>
 		</>
 	)
 }
@@ -204,6 +219,32 @@ function GetWords(txt) {
 	}
 	output.push(currWord)
 	return output
+}
+
+function updatePodium(podium, opponents) {
+	const sortedOpponents = opponents.sort((opp1, opp2) => {
+		if (opp1.wordPos > opp2.wordPos) {
+			return -1
+		} else if (opp2.wordPos > opp1.wordPos) {
+			return 1
+		} else {
+			if (opp1.letterPos > opp2.letterPos) {
+				return -1
+			} else {
+				return 1
+			}
+		}
+	})
+	
+	if (sortedOpponents[0]) {
+		podium.first = sortedOpponents[0]
+	}
+	if (sortedOpponents[1]) {
+		podium.second = sortedOpponents[1]
+	}
+	if (sortedOpponents[2]) {
+		podium.third = sortedOpponents[2]
+	}
 }
 
 function isValidCharacter(character) {
